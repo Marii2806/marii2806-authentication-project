@@ -1,68 +1,48 @@
-import React, { useState, useContext } from 'react';
-import { Context } from '../store/appContext';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useContext, useEffect, useState } from "react";
+import { Context } from "../store/appContext";
+import { Link, useNavigate } from "react-router-dom";
 
-const Login = () => {
-    const { actions } = useContext(Context);
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const navigate = useNavigate();
-    const [formError, setFormError] = useState(false);
-    const [errorMessage, setErrorMessage] = useState("");
+export const Login = () => {
+  const { store, actions } = useContext(Context);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+  const handleLogin = (e) => {
+    e.preventDefault();
+    actions.login(email, password);
+    console.log(store.token);
+  };
 
-        if (email === "" || password === "") {
-            setFormError(true);
-            setErrorMessage("Incorrect credentials");
-            return;
-        }
+  const handleLogout = () => {
+    actions.logout();
+  };
 
-        setFormError(false);
+  if (store.token && store.token !== "" && store.token !== undefined) {
+    navigate("/private");
+  }
 
-        const loginResult = await actions.login(email, password);
-        if (!loginResult.success) {
-            setFormError(true);
-            setErrorMessage(loginResult.error);
-            return;
-        }
-
-        navigate("/"); 
-    };
-
-    return (
-        <div className="container">
-            <h2>Login</h2>
-            <form onSubmit={handleSubmit}>
-                <div className="form-group">
-                    <label>Email address</label>
-                    <input 
-                        type="email" 
-                        className="form-control" 
-                        placeholder="Enter email" 
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                    />
-                </div>
-                <div className="form-group">
-                    <label>Password</label>
-                    <input 
-                        type="password" 
-                        className="form-control" 
-                        placeholder="Password" 
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                    />
-                </div>
-                {formError && <p className="error-message">{errorMessage}</p>}
-                <button type="submit" className="btn btn-primary">Submit</button>
-            </form>
-            <p>Don't have an account? <Link to="/signup">Signup</Link></p>
+  return (
+    <div>
+      {store.token && store.token !== "" && store.token !== undefined ? (
+        <button onClick={handleLogout}>Logout</button>
+      ) : (
+        <div>
+          <input
+            type="email"
+            placeholder="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <input
+            type="password"
+            placeholder="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <button onClick={handleLogin}>Login</button>
         </div>
-    );
+      )}
+    </div>
+  );
 };
-
-export default Login;
